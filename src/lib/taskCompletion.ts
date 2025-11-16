@@ -260,7 +260,7 @@ export async function completeTaskForUser(userId: string, taskId: string | numbe
     goalUpdate.target_value =
       typeof targetMetricRaw === "string"
         ? targetMetricRaw
-        : formatMetric(symbol, targetParts.number ?? added);
+        : formatMetric(symbol, targetParts.number ?? 0);
   }
   const prettyCurrent =
     formattedCurrentValue ??

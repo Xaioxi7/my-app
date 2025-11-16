@@ -27,29 +27,29 @@ function SkillCard({ skill }: { skill: SkillRow }) {
 
   return (
     <article
-      className="border bg-white/80 shadow-sm flex flex-col items-center text-center w-[360px] flex-shrink-0"
+      className="border bg-white/80 shadow-sm flex flex-col items-center text-center w-[240px] flex-shrink-0"
       style={{
         borderRadius: "var(--radius-card)",
-        padding: "var(--space-xl)",
-        minHeight: "70vh",
-        maxHeight: 640,
+        padding: "var(--space-lg)",
+        minHeight: "65vh",
+        maxHeight: 560,
         borderColor: "var(--color-border, #E5E5E5)",
       }}
     >
-      <div className="flex flex-col items-center w-full flex-grow justify-end gap-4">
+      <div className="flex flex-col items-center w-full flex-grow justify-end gap-3 pt-6">
         <div
-          className="relative flex w-24 items-end justify-center overflow-hidden rounded-full"
+          className="relative flex w-12 items-end justify-center overflow-hidden rounded-full"
           style={{
-            height: "78%",
-            minHeight: 280,
+            height: "72%",
+            minHeight: 220,
             background:
               "linear-gradient(180deg, rgba(15,23,42,0.06), rgba(15,23,42,0.02))",
             border: "1px solid rgba(15,23,42,0.08)",
-            padding: "12px 8px",
+            padding: "12px 6px",
           }}
         >
           <div
-            className="absolute inset-x-4 top-4 bottom-4 rounded-full bg-gray-100"
+            className="absolute inset-x-3 top-4 bottom-4 rounded-full bg-gray-100"
             aria-hidden
           />
           <div
@@ -64,7 +64,7 @@ function SkillCard({ skill }: { skill: SkillRow }) {
       </div>
       <div className="mt-6 flex flex-col items-center gap-3 w-full">
         <div
-          className="flex h-20 w-20 items-center justify-center text-4xl"
+          className="flex h-16 w-16 items-center justify-center text-3xl"
           style={{
             background: "var(--color-surface, #F8F8F8)",
             borderRadius: "9999px",
@@ -116,13 +116,7 @@ export default async function SkillsPage() {
   const rows = (tableMissing ? [] : data) ?? [];
 
   return (
-    <main
-      className="mx-auto flex w-full max-w-5xl flex-col"
-      style={{
-        gap: "var(--space-lg)",
-        padding: "var(--space-lg)",
-      }}
-    >
+    <main className="flex w-full max-w-none flex-col gap-5 px-0 py-6 sm:px-2">
       <header className="space-y-2">
         <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
           Skills
@@ -147,8 +141,8 @@ export default async function SkillsPage() {
           暂无技能记录。完成任务或让 AI 添加技能，即可在这里看到成长轨迹。
         </section>
       ) : (
-        <section className="overflow-x-auto">
-          <div className="flex flex-nowrap gap-6 py-4">
+        <section className="overflow-x-auto -mx-5 px-5 sm:-mx-8 sm:px-8">
+          <div className="flex flex-nowrap gap-3 py-3 min-w-[110%]">
             {rows.map((skill) => (
               <SkillCard key={skill.id} skill={skill as SkillRow} />
             ))}
