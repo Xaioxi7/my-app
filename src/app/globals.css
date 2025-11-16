@@ -17,21 +17,8 @@
 
 /* 可选：应用到 body，确保生效 */
 body {
-  background: var(--background);
-  color: var(--foreground);
-}
-/* src/app/globals.css */
-@import "tailwindcss";
-
-:root {
-  --background: #ffffff;  /* 白色背景 */
-  --foreground: #171717;  /* 深色文字 */
-}
-
-/* 确保 body 用上变量 */
-body {
-  background: var(--background);
-  color: var(--foreground);
+  background: #ffffff;
+  color: #171717;
 }
 :root {
   --brand: #FFB200;
