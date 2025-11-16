@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabaseClient'
+import { getSupabaseClient } from '@/lib/supabaseClient'
 
 // GET /api/tasks
 export async function GET() {
+  const supabase = getSupabaseClient()
   const { data, error } = await supabase.from('tasks').select('*')
 
   if (error) {
@@ -18,6 +19,7 @@ export async function POST(req: Request) {
   const body = await req.json()
   const { title } = body
 
+  const supabase = getSupabaseClient()
   const { data, error } = await supabase.from('tasks').insert([{ title }])
 
   if (error) {

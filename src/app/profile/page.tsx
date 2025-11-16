@@ -4,6 +4,8 @@ import { redirect } from 'next/navigation'
 import EditUsername from './EditUsername'
 import { updateProfileAction } from '@/actions/profile'
 
+export const dynamic = 'force-dynamic'
+
 export default async function ProfilePage() {
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

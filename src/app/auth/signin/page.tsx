@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabaseClient'
+import { getSupabaseClient } from '@/lib/supabaseClient'
 
 export default function SignInPage() {
   const router = useRouter()
@@ -18,6 +18,7 @@ export default function SignInPage() {
     setErr(null)
 
     try {
+      const supabase = getSupabaseClient()
       // 1) 前端登录
       const { data, error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) {

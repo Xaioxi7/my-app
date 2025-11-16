@@ -2,12 +2,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { createSupabaseServer, supabaseWithServiceRole } from "@/lib/supabaseServer";
+import { upsertGoalForUser } from "@/lib/goalHelpers";
+import { completeTaskForUser } from "@/lib/taskCompletion";
 
 export const runtime = "nodejs";
 
 const SYSTEM_PROMPT = `
-You manage tasks and skills for the user. Tools: add_task, complete_task, list_tasks, update_skill.
-No deadlines. No tags. Keep replies short. Never invent IDs.
+You are a bilingual assistant who chats first. Tools: add_task, complete_task, list_tasks, update_skill, set_goal.
+
+Rules:
+1. Always respond conversationally and show empathy.
+2. When the user hints at saving/completing something,先复述需求并询问是否需要记录到系统。只有收到明确的肯定（yes/好的/请记录等）后才调用工具。
+3. 完成任务时，要引用原始任务标题。如果用户只说“我读书了”，先调用 list_tasks 获取当前任务列表，用标题确认是哪一条；不确定就再问一次“是要完成《阅读书籍》还是《阅读书籍 2》？”。
+4. 成功调用工具后，告诉用户“任务已记录…”或“Big Goal 已更新…”，并保持任务/目标两条线分开。
+5. No deadlines, no tags, no invented IDs.
 `;
 
 // No tags here
@@ -60,6 +68,26 @@ const tools = [
         required: ["name", "delta"]
       }
     }
+  },
+  {
+    type: "function",
+    function: {
+      name: "set_goal",
+      description: "Create or update the user's main goal (Big Goal).",
+      parameters: {
+        type: "object",
+        properties: {
+          title: { type: "string", description: "Goal title" },
+          notes: { type: "string" },
+          cover_image_url: { type: "string" },
+          target_label: { type: "string" },
+          target_value: { type: "string" },
+          current_label: { type: "string" },
+          current_value: { type: "string" },
+          progress: { type: "number", description: "0-100" }
+        }
+      }
+    }
   }
 ];
 
@@ -71,11 +99,12 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
 
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
-  // Use any-casts to avoid SDK typing issues; functionality is unaffected
+  const history = body?.messages ?? [];
+  const messages: any[] = [{ role: "system", content: SYSTEM_PROMPT }, ...history];
   const completion = await openai.chat.completions.create({
     model: "gpt-4o-mini",
     temperature: 0.2,
-    messages: [{ role: "system", content: SYSTEM_PROMPT }, ...(body?.messages ?? [])] as any,
+    messages,
     tools: tools as any,
     tool_choice: "auto"
   } as any);
@@ -102,14 +131,15 @@ export async function POST(req: NextRequest) {
 
     if (name === "complete_task") {
       const { id } = args as { id: string };
-      const { data, error } = await db
-        .from("tasks")
-        .update({ status: "done" })
-        .eq("id", id)
-        .eq("user_id", user.id)
-        .select("*")
-        .single();
-      results.push(error ? { error: error.message } : { ok: true, task: data });
+      try {
+        const result = await completeTaskForUser(user.id, id);
+        results.push({ ok: true, tool: "complete_task", ...result });
+      } catch (err) {
+        results.push({
+          error: err instanceof Error ? err.message : String(err),
+          tool: "complete_task",
+        });
+      }
     }
 
     if (name === "list_tasks") {
@@ -146,6 +176,21 @@ export async function POST(req: NextRequest) {
         .select("*")
         .single();
       results.push(error ? { error: error.message } : { ok: true, skill: data });
+    }
+
+    if (name === "set_goal") {
+      const goalArgs = args as {
+        title?: string;
+        notes?: string;
+        cover_image_url?: string;
+        target_label?: string;
+        target_value?: string | number;
+        current_label?: string;
+        current_value?: string | number;
+        progress?: number;
+      };
+      const { data, error } = await upsertGoalForUser(db, user.id, goalArgs);
+      results.push(error ? { error: error.message } : { ok: true, goal: data });
     }
   }
 

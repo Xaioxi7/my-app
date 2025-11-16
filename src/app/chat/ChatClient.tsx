@@ -10,35 +10,49 @@ type Msg = {
   created_at: string;
 };
 
-const THREAD_STORAGE_KEY = 'chat_thread_id';
+function getStorageKey(userId?: string | null) {
+  return userId ? `chat_thread_${userId}` : 'chat_thread_id';
+}
 
 export default function ChatClient() {
+  const [profile, setProfile] = useState<{ id: string } | null>(null);
   const [threadId, setThreadId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [thinking, setThinking] = useState(false); // NEW: 助手思考中
+  const [error, setError] = useState<string | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
   // ------ helpers ------
-  async function ensureThread(): Promise<string> {
+  async function ensureThread(userId?: string | null): Promise<string> {
+    const storageKey = getStorageKey(userId);
     const cached = typeof window !== 'undefined'
-      ? localStorage.getItem(THREAD_STORAGE_KEY)
+      ? localStorage.getItem(storageKey)
       : null;
     if (cached) return cached;
 
     const r = await fetch('/api/chat/thread', { method: 'POST' });
     const data = await r.json();
     const id = data.id as string;
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(THREAD_STORAGE_KEY, id);
+    if (typeof window !== 'undefined' && userId) {
+      localStorage.setItem(storageKey, id);
     }
     return id;
   }
 
   async function loadHistory(id: string) {
     const r = await fetch(`/api/chat/history?thread_id=${id}`);
-    const data = await r.json(); // { messages: [...] }
+    const body = await r.text(); // read once so we can log raw errors too
+
+    if (!r.ok) {
+      console.error(`Failed to load history (${r.status}):`, body);
+      setError(`无法加载历史（${r.status}）：${body || '请稍后再试'}`);
+      return;
+    }
+
+    const data = body ? JSON.parse(body) : { messages: [] };
+    setError(null);
     setMessages(data.messages || []);
     // 滚到最底部
     requestAnimationFrame(() => {
@@ -49,9 +63,10 @@ export default function ChatClient() {
   async function sendUserMessage() {
     if (!input.trim() || !threadId) return;
     setLoading(true);
+    setError(null);
     try {
       // 1) 写入“用户消息”
-      await fetch('/api/chat/message', {
+      const messageResp = await fetch('/api/chat/message', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -60,6 +75,10 @@ export default function ChatClient() {
           content: input.trim(),
         }),
       });
+      const messageBody = await messageResp.text();
+      if (!messageResp.ok) {
+        throw new Error(`发送失败（${messageResp.status}）：${messageBody || '服务器无响应'}`);
+      }
 
       // 2) 先清输入框 + 刷一次历史（立刻看到自己的那条）
       setInput('');
@@ -67,10 +86,17 @@ export default function ChatClient() {
 
       // 3) 触发后端生成助手回复（NEW）
       setThinking(true);
-      await fetch(`/api/chat/reply?thread_id=${threadId}`, { method: 'POST' });
+      const replyResp = await fetch(`/api/chat/reply?thread_id=${threadId}`, { method: 'POST' });
+      const replyBody = await replyResp.text();
+      if (!replyResp.ok) {
+        throw new Error(`助手回复失败（${replyResp.status}）：${replyBody || '服务器无响应'}`);
+      }
 
       // 4) 再拉一次历史（展示助手回复）
       await loadHistory(threadId);
+    } catch (err) {
+      console.error(err);
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setThinking(false);
       setLoading(false);
@@ -79,13 +105,46 @@ export default function ChatClient() {
 
   // ------ bootstrapping ------
   useEffect(() => {
+    let cancelled = false;
     (async () => {
-      const id = await ensureThread();
-      setThreadId(id);
-      await loadHistory(id);
+      try {
+        const who = await fetch("/api/whoami").then((r) => r.json()).catch(() => null);
+        if (!cancelled) {
+          if (who?.id || who?.userId) {
+            setProfile({ id: who.id ?? who.userId });
+          } else {
+            setProfile(null);
+            setThreadId(null);
+          }
+        }
+      } catch (err) {
+        console.error(err);
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : String(err));
+        }
+      }
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => {
+      cancelled = true;
+    };
   }, []);
+
+  useEffect(() => {
+    if (!profile?.id) return;
+    (async () => {
+      try {
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("chat_thread_id");
+        }
+        const id = await ensureThread(profile.id);
+        setThreadId(id);
+        await loadHistory(id);
+      } catch (err) {
+        console.error(err);
+        setError(err instanceof Error ? err.message : String(err));
+      }
+    })();
+  }, [profile]);
 
   return (
     <div className="mx-auto max-w-3xl p-4 flex flex-col gap-4">
@@ -163,6 +222,12 @@ export default function ChatClient() {
       <div className="text-xs opacity-60">
         thread_id: {threadId ?? '(loading…)'}
       </div>
+
+      {error && (
+        <div className="text-sm text-red-600 border border-red-200 bg-red-50 rounded-md px-3 py-2">
+          {error}
+        </div>
+      )}
     </div>
   );
 }
