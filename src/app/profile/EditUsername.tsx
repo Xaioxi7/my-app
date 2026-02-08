@@ -19,13 +19,13 @@ export default function EditUsername({
   action: (formData: FormData) => Promise<{ ok: boolean; error?: string }>
   hasUsername: boolean
 }) {
-  const [open, setOpen] = useState(!hasUsername) // 没用户名时默认展开
+  const [open, setOpen] = useState(!hasUsername) // Open by default when username is missing
   const [msg, setMsg] = useState<string | null>(null)
 
   async function onSubmit(formData: FormData) {
     const res = await action(formData)
     setMsg(res.ok ? 'Saved 🎉' : `Failed: ${res.error}`)
-    if (res.ok && hasUsername === false) setOpen(false) // 首次创建后合上表单
+    if (res.ok && hasUsername === false) setOpen(false) // Close after first create
   }
 
   useEffect(() => {

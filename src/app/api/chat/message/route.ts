@@ -17,14 +17,14 @@ export async function POST(req: Request) {
 
     const db = supabaseWithServiceRole();
 
-    // 验证 thread 属于本人
+    // Verify thread belongs to current user
     const { data: th, error: thErr } = await db
       .from("chat_threads").select("id,user_id").eq("id", thread_id).maybeSingle();
     if (thErr || !th || th.user_id !== user.id) {
       return NextResponse.json({ error: "Invalid thread" }, { status: 400 });
     }
 
-    // 写入消息 + 更新线程时间
+    // Insert message + update thread timestamp
     const { data: msg, error } = await db
       .from("chat_messages")
       .insert({ thread_id, user_id: user.id, role, content })

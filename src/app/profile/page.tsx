@@ -37,7 +37,7 @@ export default async function ProfilePage() {
         Username: {profile?.username ?? 'No username set yet.'}
       </p>
 
-      {/* 这里实现：首次没有用户名时显示表单；有了之后显示 Edit 按钮，点开再编辑 */}
+      {/* Show form when no username; otherwise show Edit button */}
       <EditUsername action={updateProfileAction} hasUsername={hasUsername} />
 
       <form action="/api/signout" method="post" className="mt-8">

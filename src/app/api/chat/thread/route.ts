@@ -8,7 +8,7 @@ export async function POST() {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const db = supabaseWithServiceRole();
-  // 复用最近一个线程；没有就新建
+  // Reuse the most recent thread; otherwise create a new one
   const { data: latest } = await db
     .from("chat_threads")
     .select("*")

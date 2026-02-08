@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { getSupabaseClient } from '@/lib/supabaseClient';
+import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 
 export default function SignUpPage() {
@@ -12,6 +12,8 @@ export default function SignUpPage() {
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const hasSupabaseConfig =
+    !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -20,7 +22,11 @@ export default function SignUpPage() {
     setErr(null);
 
     try {
-      const supabase = getSupabaseClient();
+      if (!hasSupabaseConfig) {
+        setErr('Missing Supabase config. Check NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.');
+        return;
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -31,15 +37,15 @@ export default function SignUpPage() {
         return;
       }
 
-      // 关键逻辑：
-      // - 如果后台关闭了“Confirm email”，Supabase 会直接返回 session（已登录）
-      // - 如果后台开启了“Confirm email”，不会返回 session，需要用户去邮箱点确认链接
+      // Key logic:
+      // - If "Confirm email" is off, Supabase returns a session (logged in)
+      // - If "Confirm email" is on, no session is returned until email verification
       if (data.session) {
-        // 已经登录，直接进站
+        // Logged in, go to app
         setMsg('Account created. Logging you in…');
         router.replace('/chat');
       } else {
-        // 没有 session，则说明后台开启了邮件验证（或策略需要）
+        // No session means email confirmation is required
         setMsg('Sign up successful! Please check your email to verify, then sign in.');
       }
     } catch (e: any) {
@@ -52,6 +58,13 @@ export default function SignUpPage() {
   return (
     <main className="max-w-md mx-auto p-6">
       <h1 className="text-2xl font-semibold mb-4">Sign up</h1>
+
+      {!hasSupabaseConfig && (
+        <div className="mb-4 rounded border border-red-300 bg-red-50 p-3 text-sm text-red-700">
+          Missing Supabase config. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY,
+          then restart the dev server.
+        </div>
+      )}
 
       {err && (
         <div className="mb-4 rounded border border-red-300 bg-red-50 p-3 text-sm text-red-700">
@@ -84,7 +97,7 @@ export default function SignUpPage() {
         />
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || !hasSupabaseConfig}
           className="w-full rounded bg-black px-4 py-2 text-white disabled:opacity-60"
         >
           {loading ? 'Creating…' : 'Create account'}

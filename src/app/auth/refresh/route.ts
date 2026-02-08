@@ -8,7 +8,7 @@ export async function POST(req: Request) {
 
   try {
     if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-      // 必须同时带 access_token 和 refresh_token
+      // Must include both access_token and refresh_token
       await supabase.auth.setSession({
         access_token: session?.access_token ?? '',
         refresh_token: session?.refresh_token ?? '',

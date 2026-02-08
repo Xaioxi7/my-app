@@ -6,10 +6,10 @@ export async function POST(req: Request) {
   const formData = await req.formData()
   const username = String(formData.get('username') || '')
 
-  // ✅ 拿到 Next.js 的 cookie store
+  // Get Next.js cookie store
   const cookieStore = cookies()
 
-  // ✅ 用适配器形式传 cookies：必须包含 get / set / remove
+  // Pass cookies via adapter: must include get / set / remove
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -22,18 +22,18 @@ export async function POST(req: Request) {
           cookieStore.set({ name, value, ...options })
         },
         remove(name: string, options?: any) {
-          // 通过设置 maxAge=0 清除
+          // Clear by setting maxAge=0
           cookieStore.set({ name, value: '', ...options, maxAge: 0 })
         },
       },
     }
   )
 
-  // 当前用户
+  // Current user
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.redirect(new URL('/auth/signin', req.url))
 
-  // 写入/更新 profiles
+  // Write/update profiles
   const { error } = await supabase
     .from('profiles')
     .upsert({ id: user.id, username, updated_at: new Date().toISOString() })
@@ -46,7 +46,7 @@ export async function POST(req: Request) {
   return NextResponse.redirect(new URL('/profile', req.url))
 }
 
-// 可选：防止直接 GET 这个 URL 时 404
+// Optional: avoid 404 on direct GET
 export async function GET(req: Request) {
   return NextResponse.redirect(new URL('/profile', req.url))
 }

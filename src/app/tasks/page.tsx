@@ -148,7 +148,7 @@ function GoalSection({ goal }: { goal: Goal | null }) {
 export default async function TasksPage() {
   const supa = createSupabaseServer();
   const { data: { user } } = await supa.auth.getUser();
-  if (!user) return <main className="p-6">请先登录 / Please sign in.</main>;
+  if (!user) return <main className="p-6">Please sign in.</main>;
 
   const [{ data: goals, error: goalError }, { data: tasks, error }] =
     await Promise.all([
@@ -174,7 +174,7 @@ export default async function TasksPage() {
     (goalError.code === "42P01" ||
       goalError.message?.toLowerCase().includes("could not find the table"));
 
-  // 兜底：老数据可能没有 status；用 done 来推导
+  // Fallback: legacy rows may not have status; derive from done
   const rows = (tasks ?? []).map((t: any) => ({
     ...t,
     status: t?.status ?? (t?.done ? "done" : "open"),
@@ -190,7 +190,7 @@ export default async function TasksPage() {
         )}
       </div>
       {rows.length === 0 ? (
-        <p className="opacity-70">暂无任务 / No tasks yet.</p>
+        <p className="opacity-70">No tasks yet.</p>
       ) : (
         <ul className="space-y-2">
           {rows.map((t: any) => (

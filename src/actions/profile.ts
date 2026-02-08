@@ -34,7 +34,7 @@ export async function updateProfileAction(formData: FormData) {
 
   if (error) return { ok: false, error: error.message }
 
-  // 让 /profile 重新取数（无整页跳转）
+  // Revalidate /profile without a full page reload
   revalidatePath('/profile')
   return { ok: true }
 }

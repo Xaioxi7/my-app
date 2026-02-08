@@ -6,9 +6,9 @@ export const metadata = { title: "My App" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="bg-white text-[#171717]">
-      <body className="min-h-screen bg-white text-[#171717] antialiased">
-        {/* 顶部导航 */}
+    <html lang="en">
+      <body className="min-h-screen bg-[var(--background)] text-[var(--foreground)] antialiased">
+        {/* Top navigation */}
         <header className="sticky top-0 z-40 border-b border-neutral-200/60 bg-white/80 backdrop-blur">
           <nav className="mx-auto flex max-w-5xl items-center gap-6 px-6 py-3 text-sm">
             <Link href="/" className="font-semibold tracking-tight">My App</Link>
@@ -23,7 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </nav>
         </header>
 
-        {/* 页面内容容器 */}
+        {/* Page content */}
         <main className="mx-auto max-w-5xl px-6 py-8">{children}</main>
       </body>
     </html>

@@ -15,16 +15,16 @@ export async function POST(req: Request) {
   const { message } = (await req.json()) as { message: string }
   const supabase = createSupabaseServer()
 
-  // 先拿当前登录用户
+  // Get current signed-in user
   const {
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) {
-    return NextResponse.json({ reply: '请先登录' }, { status: 401 })
+    return NextResponse.json({ reply: 'Please sign in.' }, { status: 401 })
   }
   const userId = user.id
 
-  // 解析指令（有 OpenAI 用 OpenAI，没开就用简单兜底）
+  // Parse commands (use OpenAI if enabled, otherwise simple fallback)
   const useOpenAI = String(process.env.USE_OPENAI).toLowerCase() === 'true'
   const hasKey = !!process.env.OPENAI_API_KEY
   let parsed: AiParsed | null = null
@@ -66,17 +66,17 @@ export async function POST(req: Request) {
   try {
     if (parsed?.tool === 'add_task') {
       const title = (parsed.args.title || '').trim()
-      if (!title) return NextResponse.json({ reply: '任务标题不能为空' })
+      if (!title) return NextResponse.json({ reply: 'Task title cannot be empty.' })
 
       const { error } = await supabase.from('tasks').insert({ user_id: userId, title, done: false })
-      if (error) return NextResponse.json({ reply: '写入任务失败' })
+      if (error) return NextResponse.json({ reply: 'Failed to create task.' })
 
-      return NextResponse.json({ reply: `已添加任务：${title}` })
+      return NextResponse.json({ reply: `Task added: ${title}` })
     }
 
     if (parsed?.tool === 'complete_task') {
       const taskId = Number(parsed.args.id)
-      if (!taskId) return NextResponse.json({ reply: '缺少任务 id' })
+      if (!taskId) return NextResponse.json({ reply: 'Missing task id.' })
 
       const { data: one } = await supabase
         .from('tasks')
@@ -84,10 +84,10 @@ export async function POST(req: Request) {
         .eq('id', taskId)
         .eq('user_id', userId)
         .maybeSingle()
-      if (!one) return NextResponse.json({ reply: '没有找到该任务（或无权限）' })
+      if (!one) return NextResponse.json({ reply: 'Task not found (or no permission).' })
 
       const { error: uErr } = await supabase.from('tasks').update({ done: true }).eq('id', taskId).eq('user_id', userId)
-      if (uErr) return NextResponse.json({ reply: '完成任务失败' })
+      if (uErr) return NextResponse.json({ reply: 'Failed to complete task.' })
 
       const skill = parsed.args.skill || guessSkillFromTitle(one.title || '')
       if (skill) {
@@ -105,7 +105,7 @@ export async function POST(req: Request) {
         }
       }
 
-      return NextResponse.json({ reply: `任务 #${taskId} 已完成${skill ? `，技能「${skill}」+1` : ''}` })
+      return NextResponse.json({ reply: `Task #${taskId} completed${skill ? `, skill "${skill}" +1` : ''}` })
     }
 
     if (parsed?.tool === 'list_tasks') {
@@ -116,22 +116,22 @@ export async function POST(req: Request) {
         .order('created_at', { ascending: false })
 
       return NextResponse.json({
-        reply: data?.length ? `你的任务共 ${data.length} 条` : '暂无任务',
+        reply: data?.length ? `You have ${data.length} tasks.` : 'No tasks yet.',
         tasks: data ?? [],
       })
     }
 
-    return NextResponse.json({ reply: '我没听懂，要不要看看任务列表？' })
+    return NextResponse.json({ reply: 'Sorry, I did not understand. Want to see your task list?' })
   } catch (e: any) {
     console.error('[COMMAND ERROR]', e?.message || e)
-    return NextResponse.json({ reply: '服务端异常，请稍后重试' })
+    return NextResponse.json({ reply: 'Server error. Please try again later.' })
   }
 }
 
-// 很简单的“从标题猜技能”
+// Simple skill guess based on title
 function guessSkillFromTitle(title: string): string | null {
   const s = title.toLowerCase()
-  if (s.includes('python') || s.includes('code') || s.includes('算法')) return 'coding'
+  if (s.includes('python') || s.includes('code') || s.includes('algorithm')) return 'coding'
   if (s.includes('gym') || s.includes('run') || s.includes('walk')) return 'fitness'
   if (s.includes('read') || s.includes('book') || s.includes('paper')) return 'reading'
   return null

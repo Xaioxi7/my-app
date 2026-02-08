@@ -25,6 +25,6 @@ export async function POST(request: Request) {
 
   await supabase.auth.signOut()
 
-  // 在 Route Handler 里用 NextResponse 重定向
+  // Redirect from Route Handler using NextResponse
   return NextResponse.redirect(new URL('/auth/signin', request.url))
 }

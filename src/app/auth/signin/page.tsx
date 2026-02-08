@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { getSupabaseClient } from '@/lib/supabaseClient'
+import { supabase } from '@/lib/supabaseClient'
 
 export default function SignInPage() {
   const router = useRouter()
@@ -18,23 +18,22 @@ export default function SignInPage() {
     setErr(null)
 
     try {
-      const supabase = getSupabaseClient()
-      // 1) 前端登录
+      // 1) Client sign-in
       const { data, error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) {
         setErr(error.message)
         return
       }
 
-      // 2) ★ 同步到服务端（把 session 带过去）
+      // 2) Sync to server (send session)
       await fetch('/auth/refresh', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ event: 'SIGNED_IN', session: data.session }),
-        // 同源即可，不用写 credentials
+        // Same-origin; credentials not required
       })
 
-      // 3) 跳转
+      // 3) Redirect
       router.replace('/chat')
     } catch (e: any) {
       setErr(String(e?.message || e))

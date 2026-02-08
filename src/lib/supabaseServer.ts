@@ -1,6 +1,5 @@
 // src/lib/supabaseServer.ts
-// 🇨🇳 说明：保留“会话读取版”和“高权限写库版”两个客户端。
-// 🇺🇸 Note: Keep both clients — one for auth-aware reads, one for admin writes.
+// Note: Keep both clients — one for auth-aware reads, one for admin writes.
 
 import { cookies } from 'next/headers';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
