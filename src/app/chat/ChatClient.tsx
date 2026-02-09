@@ -157,9 +157,6 @@ export default function ChatClient() {
       </form>
 
       {/* Thread info (debug) */}
-      <div className="text-xs opacity-60">
-        thread_id: {threadId ?? '(loading…)'}
-      </div>
     </div>
   );
 }
