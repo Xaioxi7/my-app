@@ -2,7 +2,7 @@
 import "./globals.css";
 import Link from "next/link";
 
-export const metadata = { title: "My App" };
+export const metadata = { title: "My favorite tasks" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -11,7 +11,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Top navigation */}
         <header className="sticky top-0 z-40 border-b border-neutral-200/60 bg-white/80 backdrop-blur">
           <nav className="mx-auto flex max-w-5xl items-center gap-6 px-6 py-3 text-sm">
-            <Link href="/" className="font-semibold tracking-tight">My App</Link>
+            <Link href="/" className="font-semibold tracking-tight">My favorite tasks</Link>
             <div className="flex items-center gap-4 text-neutral-600">
               <Link href="/chat" className="hover:text-black">Chat</Link>
               <Link href="/tasks" className="hover:text-black">Tasks</Link>
