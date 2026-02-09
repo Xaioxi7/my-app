@@ -91,10 +91,7 @@ export default function ChatClient() {
     <div className="mx-auto max-w-3xl p-4 flex flex-col gap-4">
       {/* Header */}
       <div className="rounded-lg border p-4 text-sm leading-6">
-        <b>Assistant:</b> Hi! I can chat freely like ChatGPT, and when needed I’ll manage your tasks/skills automatically.<br />
-        <span className="opacity-70">
-          Hi! I can chat freely like ChatGPT, and when needed I’ll manage your tasks/skills automatically.
-        </span>
+        <b>Assistant:</b> Hi! I can chat freely like ChatGPT, and when needed I’ll manage your tasks/skills automatically.
       </div>
 
       {/* Message list */}
