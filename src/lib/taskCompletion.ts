@@ -109,7 +109,7 @@ async function evaluateTaskImpact(goal: GoalRow, taskTitle: string): Promise<Imp
     const prompt = `
 You estimate how much progress a task contributes toward a user's big goal.
 Return a JSON object with: impact_percent (0.1-10), current_value_delta (numeric, can be 0), reasoning.
-Goal title: ${goal.title ?? "未命名"}
+Goal title: ${goal.title ?? "Untitled"}
 Goal target value: ${goal.target_value ?? "unknown"}
 Goal current value: ${goal.current_value ?? "unknown"}
 Current progress: ${goal.progress ?? 0}%
@@ -155,7 +155,7 @@ async function evaluateSkillImpact(goal: GoalRow, taskTitle: string): Promise<Sk
     const prompt = `
 You determine which single skill benefits the most from the completed task.
 Return JSON with: skill_name (short noun phrase), progress_delta (0.5-20), and icon (emoji or short text).
-Goal: ${goal.title ?? "未命名目标"}
+Goal: ${goal.title ?? "Untitled goal"}
 Completed task: ${taskTitle || "Untitled task"}
 Existing skills should remain consistent if the same skill already exists.
 `;
@@ -201,7 +201,7 @@ export async function completeTaskForUser(userId: string, taskId: string | numbe
     .eq("user_id", userId)
     .maybeSingle<TaskRow>();
   if (taskErr) throw new Error(taskErr.message);
-  if (!task) throw new Error("任务不存在或无权限。");
+  if (!task) throw new Error("Task not found or no permission.");
 
   const { data: updatedTask, error: updateErr } = await db
     .from("tasks")

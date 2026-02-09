@@ -78,7 +78,7 @@ function SkillCard({ skill }: { skill: SkillRow }) {
             Skill
           </p>
           <h2 className="text-lg font-semibold text-gray-900">
-            {skill.name ?? "未命名技能"}
+            {skill.name ?? "Untitled skill"}
           </h2>
           <div className="text-sm text-gray-600">
             Points {formatNumber(skill.points)} · Level{" "}
@@ -96,7 +96,7 @@ export default async function SkillsPage() {
     data: { user },
   } = await supa.auth.getUser();
   if (!user)
-    return <main className="p-6">请先登录 / Please sign in.</main>;
+    return <main className="p-6">Please sign in.</main>;
 
   const { data, error } = await supa
     .from("skills")
@@ -122,10 +122,10 @@ export default async function SkillsPage() {
           Skills
         </p>
         <h1 className="text-2xl font-semibold text-gray-900">
-          AI 正在跟踪你的技能成长
+          AI is tracking your skill growth
         </h1>
         <p className="text-sm text-gray-600">
-          完成聊天中的任务后，AI 会自动累积积分与等级，无需设置截止日期。
+          After completing chat tasks, AI automatically accumulates points and levels. No deadlines needed.
         </p>
       </header>
 
@@ -138,7 +138,7 @@ export default async function SkillsPage() {
             borderColor: "var(--color-border, #E5E5E5)",
           }}
         >
-          暂无技能记录。完成任务或让 AI 添加技能，即可在这里看到成长轨迹。
+          No skills yet. Complete tasks or ask AI to add skills to see your growth here.
         </section>
       ) : (
         <section className="overflow-x-auto -mx-5 px-5 sm:-mx-8 sm:px-8">

@@ -125,7 +125,7 @@ export async function upsertGoalForUser(
     id: randomUUID(),
     user_id: userId,
     visible: true,
-    title: normalized.title ?? "未命名目标",
+    title: normalized.title ?? "Untitled goal",
     notes: normalized.notes ?? null,
     cover_image_url: normalized.cover_image_url ?? null,
     target_label: normalized.target_label ?? "Target",

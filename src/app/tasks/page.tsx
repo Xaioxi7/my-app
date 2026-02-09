@@ -54,9 +54,9 @@ function GoalSection({ goal }: { goal: Goal | null }) {
         <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
           Big Goal
         </p>
-        <h2 className="text-lg font-semibold">未设置主要目标</h2>
+        <h2 className="text-lg font-semibold">No main goal set</h2>
         <p className="text-sm text-gray-600">
-          通过聊天告诉 AI 你的长期目标，它会在这里显示并驱动每日任务。
+          Tell the AI your long-term goal in chat. It will appear here and drive daily tasks.
         </p>
       </section>
     );
@@ -93,13 +93,13 @@ function GoalSection({ goal }: { goal: Goal | null }) {
                 Big Goal
               </p>
               <h2 className="text-xl font-semibold">
-                {goal.title ?? "未命名目标"}
+                {goal.title ?? "Untitled goal"}
               </h2>
               {goal.notes ? (
                 <p className="text-sm text-gray-600">{goal.notes}</p>
               ) : (
                 <p className="text-sm text-gray-600">
-                  Current salary: {formatMetric(derivedCurrent)}，Target salary:{" "}
+                  Current salary: {formatMetric(derivedCurrent)}, Target salary:{" "}
                   {formatMetric(derivedTarget)}
                 </p>
               )}

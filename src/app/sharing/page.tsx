@@ -11,7 +11,7 @@ type MomentRow = {
 };
 
 function formatDate(value?: string | null) {
-  if (!value) return "刚刚";
+  if (!value) return "Just now";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
   return date.toLocaleString();
@@ -29,10 +29,10 @@ function MomentCard({ moment }: { moment: MomentRow }) {
     >
       <header className="space-y-1">
         <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-          {moment.source ?? "AI 推送"}
+          {moment.source ?? "AI Digest"}
         </div>
         <h2 className="text-lg font-semibold text-gray-900">
-          {moment.title ?? "未命名推荐"}
+          {moment.title ?? "Untitled recommendation"}
         </h2>
       </header>
       {moment.summary && (
@@ -43,11 +43,11 @@ function MomentCard({ moment }: { moment: MomentRow }) {
           className="mt-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-800"
           style={{ borderRadius: "var(--radius-sm)" }}
         >
-          推荐理由：{moment.reason}
+          Why recommended: {moment.reason}
         </div>
       )}
       <footer className="mt-4 text-xs text-gray-500">
-        推送时间：{formatDate(moment.created_at)}
+        Sent: {formatDate(moment.created_at)}
       </footer>
     </article>
   );
@@ -59,7 +59,7 @@ export default async function SharingPage() {
     data: { user },
   } = await supa.auth.getUser();
   if (!user)
-    return <main className="p-6">请先登录 / Please sign in.</main>;
+    return <main className="p-6">Please sign in.</main>;
 
   const { data, error } = await supa
     .from("moments")
@@ -91,10 +91,10 @@ export default async function SharingPage() {
           Moments
         </p>
         <h1 className="text-2xl font-semibold text-gray-900">
-          AI 推荐的学习/资源卡片
+          AI-curated learning/resources
         </h1>
         <p className="text-sm text-gray-600">
-          系统会在随机时间推送文章、视频或新闻，帮助你靠近 Big Goal。
+          The system periodically delivers articles, videos, or news to help you reach your Big Goal.
         </p>
       </header>
 
@@ -107,7 +107,7 @@ export default async function SharingPage() {
             borderColor: "var(--color-border, #E5E5E5)",
           }}
         >
-          暂无 Moments。继续与 AI 互动或完成任务，系统会自动推送灵感卡片。
+          No moments yet. Keep chatting or completing tasks, and the system will send inspiration cards automatically.
         </section>
       ) : (
         <section

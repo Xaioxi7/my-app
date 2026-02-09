@@ -34,10 +34,10 @@ export default async function DoublePage() {
           Double Mode
         </p>
         <h1 className="text-2xl font-semibold text-gray-900">
-          聊天与任务并行处理
+          Chat and tasks side by side
         </h1>
         <p className="text-sm text-gray-600">
-          左侧保持与 AI 对话，右侧实时查看并更新任务进度。
+          Keep chatting with AI on the left, and track task progress on the right.
         </p>
       </header>
 
@@ -54,7 +54,7 @@ export default async function DoublePage() {
               Chat
             </h2>
             <p className="text-base font-semibold text-gray-900">
-              与 AI 协作
+              Collaborate with AI
             </p>
           </div>
           <div className="flex-1 overflow-y-auto px-2 py-4 sm:px-4">
@@ -74,7 +74,7 @@ export default async function DoublePage() {
               Tasks
             </h2>
             <p className="text-base font-semibold text-gray-900">
-              今日清单
+              Today’s list
             </p>
           </div>
           <div className="flex-1 overflow-y-auto px-6 py-4">
@@ -82,7 +82,7 @@ export default async function DoublePage() {
               <p className="text-sm text-red-600">{error.message}</p>
             ) : rows.length === 0 ? (
               <p className="text-sm text-gray-600">
-                暂无任务。请在聊天中让 AI 添加一个待办。
+                No tasks yet. Ask the AI in chat to add a task.
               </p>
             ) : (
               <ul className="space-y-3">
