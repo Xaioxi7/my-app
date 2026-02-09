@@ -15,3 +15,6 @@ export function getSupabaseClient(): SupabaseClient {
   }
   return cached
 }
+
+// Backward-compatible named export for client code
+export const supabase = getSupabaseClient()
